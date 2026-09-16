@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Telemetria ESSENZIALE</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-</head>
-<body>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -99,6 +97,9 @@
   let speedHistory = [];
   const maxSamples = 40; // Numero di punti visibili nel grafico ECG
 
+  let currentSpeed = 0;
+  let targetSpeed = 0;
+
   // Configurazione Grafico Stile ECG
   const ctx = document.getElementById('ecgChart').getContext('2d');
   const ecgChart = new Chart(ctx, {
@@ -118,45 +119,61 @@
       responsive: true,
       maintainAspectRatio: false,
       animation: false, // Disabilita animazioni pesanti per massima reattività
+      parsing: false,   // Velocizza il rendering
+      normalized: true,
       scales: {
         y: { 
           beginAtZero: true, 
           grid: { color: '#1a1a1a' }, 
-          ticks: { display: false } // Rimuove i numeri sull'asse Y per massima pulizia
+          ticks: { display: false } // Rimuove i numeri sull'asse Y
         },
         x: { 
           grid: { display: false } 
         }
       },
       plugins: { 
-        legend: { display: false } // Rimuove la legenda
+        legend: { display: false }
       }
     }
   });
 
-  // Lettura GPS
+  // Animazione fluida a 60 FPS per il numero della velocità
+  function animateSpeed() {
+    currentSpeed += (targetSpeed - currentSpeed) * 0.1;
+    
+    const speedEl = document.getElementById('speed');
+    if (speedEl) {
+      speedEl.innerText = Math.round(currentSpeed);
+    }
+
+    requestAnimationFrame(animateSpeed);
+  }
+  requestAnimationFrame(animateSpeed);
+
+  // Lettura GPS ad altissima frequenza
   if ("geolocation" in navigator) {
     navigator.geolocation.watchPosition(
       (pos) => {
-        let currentSpeed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
-        let speedFormatted = currentSpeed.toFixed(1);
-
-        // Update Velocità Attuale
-        document.getElementById('speed').innerText = Math.round(currentSpeed);
+        let rawSpeed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
+        targetSpeed = rawSpeed;
 
         // Calcolo Velocità Media
-        speedHistory.push(currentSpeed);
+        speedHistory.push(rawSpeed);
         let sum = speedHistory.reduce((a, b) => a + b, 0);
         let avg = (sum / speedHistory.length).toFixed(1);
         document.getElementById('avg-speed').innerText = avg;
 
-        // Update Grafico ECG
+        // Update Grafico ECG senza scatti
         ecgChart.data.datasets[0].data.shift();
-        ecgChart.data.datasets[0].data.push(currentSpeed);
-        ecgChart.update();
+        ecgChart.data.datasets[0].data.push(rawSpeed);
+        ecgChart.update('none'); // Update istantaneo
       },
       (err) => console.warn('Errore GPS: ' + err.message),
-      { enableHighAccuracy: true, maximumAge: 500 }
+      { 
+        enableHighAccuracy: true, 
+        maximumAge: 0, 
+        timeout: 5000 
+      }
     );
   }
 </script>
