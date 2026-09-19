@@ -1,181 +1,240 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Telemetria ESSENZIALE</title>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Telemetria Carrello</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+        /* Metà Superiore: Tachimetro */
+        .speed-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 2px solid #2a2a2a;
+            background: radial-gradient(circle at center, #1e1e1e 0%, #121212 100%);
+        }
+        .speed-display {
+            font-size: 5.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1;
+        }
+        .speed-unit {
+            font-size: 1.2rem;
+            color: #ff9500;
+            font-weight: 600;
+            margin-top: 5px;
+            letter-spacing: 2px;
+        }
+        
+        /* Metà Inferiore: Grafico o Navigatore */
+        .bottom-section {
+            flex: 1;
+            position: relative;
+            background-color: #181818;
+        }
+        .view-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(20px);
+        }
+        
+        /* Stile Navigatore */
+        #nav-panel iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
 
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-      background: #0f0f0f; 
-      color: #fff; 
-      height: 100vh; 
-      overflow: hidden; 
-    }
-    
-    .dashboard { display: flex; height: 100vh; width: 100vw; }
-    
-    /* LATO SINISTRO: Velocità Attuale */
-    .left-panel { 
-      flex: 1; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: center; 
-      align-items: center; 
-      border-right: 1px solid #222; 
-    }
-    .speed-val { 
-      font-size: 7.5rem; 
-      font-weight: 800; 
-      color: #ffffff; 
-      line-height: 0.9; 
-      letter-spacing: -2px;
-    }
-    .unit { 
-      font-size: 1.2rem; 
-      color: #555; 
-      font-weight: 600;
-      text-transform: uppercase; 
-      margin-top: 10px;
-    }
-
-    /* LATO DESTRO: Media + Grafico ECG */
-    .right-panel { 
-      flex: 1.2; 
-      display: flex; 
-      flex-direction: column; 
-      padding: 20px;
-      justify-content: space-between;
-    }
-    
-    .avg-box {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #ff9500; /* Arancione stile iOS */
-      background: #1c1c1e;
-      padding: 8px 16px;
-      border-radius: 8px;
-      align-self: flex-start;
-      letter-spacing: 0.5px;
-    }
-
-    .chart-container { 
-      flex: 1; 
-      width: 100%;
-      margin-top: 15px;
-      position: relative; 
-    }
-  </style>
+        /* Pulsante Freccia Arancione */
+        .toggle-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            background-color: #ff9500;
+            color: #121212;
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .toggle-btn:active {
+            transform: translateY(-50%) scale(0.9);
+            background-color: #e08300;
+        }
+        .toggle-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: #121212;
+            transition: transform 0.3s ease;
+        }
+        .toggle-btn.active svg {
+            transform: rotate(180deg);
+        }
+    </style>
 </head>
 <body>
 
-<div class="dashboard">
-  <!-- SINISTRA -->
-  <div class="left-panel">
-    <div class="speed-val" id="speed">0</div>
-    <div class="unit">km/h</div>
-  </div>
+    <div class="container">
+        <!-- Metà Superiore: Velocità -->
+        <div class="speed-section">
+            <div id="speed" class="speed-display">0</div>
+            <div class="speed-unit">KM/H</div>
+        </div>
 
-  <!-- DESTRA -->
-  <div class="right-panel">
-    <div class="avg-box">
-      MEDIA: <span id="avg-speed">0.0</span> km/h
+        <!-- Metà Inferiore: Contenitore Alternato -->
+        <div class="bottom-section">
+            <!-- Pannello Grafico -->
+            <div id="chart-panel" class="view-panel">
+                <canvas id="speedChart"></canvas>
+            </div>
+
+            <!-- Pannello Navigatore -->
+            <div id="nav-panel" class="view-panel hidden">
+                <iframe id="map-frame" src="https://www.openstreetmap.org/export/embed.html"></iframe>
+            </div>
+
+            <!-- Pulsante Freccia Arancione -->
+            <button id="toggleViewBtn" class="toggle-btn" aria-label="Cambia Vista">
+                <svg viewBox="0 0 24 24">
+                    <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                </svg>
+            </button>
+        </div>
     </div>
-    
-    <div class="chart-container">
-      <canvas id="ecgChart"></canvas>
-    </div>
-  </div>
-</div>
 
-<script>
-  let speedHistory = [];
-  const maxSamples = 40; // Numero di punti visibili nel grafico ECG
+    <script>
+        // Configurazione Grafico Chart.js
+        const ctx = document.getElementById('speedChart').getContext('2d');
+        const maxDataPoints = 30;
+        const speedData = Array(maxDataPoints).fill(0);
+        const labels = Array(maxDataPoints).fill('');
 
-  let currentSpeed = 0;
-  let targetSpeed = 0;
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: speedData,
+                    borderColor: '#ff9500',
+                    borderWidth: 2.5,
+                    fill: true,
+                    backgroundColor: 'rgba(255, 149, 0, 0.15)',
+                    tension: 0.3,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { display: false },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#2a2a2a' },
+                        ticks: { color: '#888888' }
+                    }
+                }
+            }
+        });
 
-  // Configurazione Grafico Stile ECG
-  const ctx = document.getElementById('ecgChart').getContext('2d');
-  const ecgChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: Array(maxSamples).fill(''),
-      datasets: [{
-        data: Array(maxSamples).fill(0),
-        borderColor: '#ff9500', // Linea Arancione
-        borderWidth: 2,
-        pointRadius: 0, // Nasconde i pallini per un effetto linea fluida
-        tension: 0.2,   // Leggera curvatura stile impulso
-        fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false, // Disabilita animazioni pesanti per massima reattività
-      
-      scales: {
-        y: { 
-          beginAtZero: true, 
-          grid: { color: '#1a1a1a' }, 
-          ticks: { display: false } // Rimuove i numeri sull'asse Y
-        },
-        x: { 
-          grid: { display: false } 
+        // Variabili Telemetria e GPS
+        let currentSpeed = 0;
+        let displayedSpeed = 0;
+
+        // Animazione fluida tachimetro
+        function animateSpeed() {
+            displayedSpeed += (currentSpeed - displayedSpeed) * 0.1;
+            document.getElementById('speed').textContent = Math.round(displayedSpeed);
+            requestAnimationFrame(animateSpeed);
         }
-      },
-      plugins: { 
-        legend: { display: false }
-      }
-    }
-  });
+        animateSpeed();
 
-  // Animazione fluida a 60 FPS per il numero della velocità
-  function animateSpeed() {
-    currentSpeed += (targetSpeed - currentSpeed) * 0.1;
-    
-    const speedEl = document.getElementById('speed');
-    if (speedEl) {
-      speedEl.innerText = Math.round(currentSpeed);
-    }
+        // Tracciamento GPS
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition(
+                (position) => {
+                    const speedMs = position.coords.speed || 0;
+                    currentSpeed = Math.max(0, speedMs * 3.6); // Converte in km/h
 
-    requestAnimationFrame(animateSpeed);
-  }
-  requestAnimationFrame(animateSpeed);
+                    // Aggiorna Grafico
+                    speedData.push(currentSpeed);
+                    speedData.shift();
+                    chart.update();
 
-  // Lettura GPS ad altissima frequenza
-  if ("geolocation" in navigator) {
-    navigator.geolocation.watchPosition(
-      (pos) => {
-        let rawSpeed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
-        targetSpeed = rawSpeed;
+                    // Aggiorna Mappa Navigatore se disponibile
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const mapFrame = document.getElementById('map-frame');
+                    if (mapFrame && lat && lon) {
+                        mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.005}%2C${lat-0.005}%2C${lon+0.005}%2C${lat+0.005}&layer=mapnik&marker=${lat}%2C${lon}`;
+                    }
+                },
+                (error) => console.log(error),
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+            );
+        }
 
-        // Calcolo Velocità Media
-        speedHistory.push(rawSpeed);
-        let sum = speedHistory.reduce((a, b) => a + b, 0);
-        let avg = (sum / speedHistory.length).toFixed(1);
-        document.getElementById('avg-speed').innerText = avg;
+        // Gestione Cambio Vista (Grafico / Navigatore)
+        const toggleBtn = document.getElementById('toggleViewBtn');
+        const chartPanel = document.getElementById('chart-panel');
+        const navPanel = document.getElementById('nav-panel');
 
-        // Update Grafico ECG senza scatti
-        ecgChart.data.datasets[0].data.shift();
-        ecgChart.data.datasets[0].data.push(rawSpeed);
-        ecgChart.update('none'); // Update istantaneo
-      },
-      (err) => console.warn('Errore GPS: ' + err.message),
-      { 
-        enableHighAccuracy: true, 
-        maximumAge: 0, 
-        timeout: 5000 
-      }
-    );
-  }
-</script>
-
+        toggleBtn.addEventListener('click', () => {
+            const isChartVisible = !chartPanel.classList.contains('hidden');
+            if (isChartVisible) {
+                chartPanel.classList.add('hidden');
+                navPanel.classList.remove('hidden');
+                toggleBtn.classList.add('active');
+            } else {
+                navPanel.classList.add('hidden');
+                chartPanel.classList.remove('hidden');
+                toggleBtn.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>
