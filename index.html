@@ -48,7 +48,7 @@
             z-index: 2;
         }
 
-        /* Schermata Inclinometri */
+        /* Schermata Inclinometri Grandi */
         #screen-clinometer {
             z-index: 1;
             opacity: 0;
@@ -117,14 +117,16 @@
             border: none;
         }
 
-        /* Stile Schermata Inclinometri */
+        /* Stile Schermata Inclinometri Grandi a Schermo Intero */
         .top-section-clinometer {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: space-evenly;
             align-items: center;
-            padding: 8px 0;
+            padding: 10px 0;
+            width: 100%;
+            height: 100%;
         }
         .speed-bar {
             font-size: 0.9rem;
@@ -132,21 +134,22 @@
             font-weight: 600;
             letter-spacing: 1px;
             background: rgba(255, 149, 0, 0.1);
-            padding: 3px 12px;
+            padding: 4px 14px;
             border-radius: 15px;
             border: 1px solid rgba(255, 149, 0, 0.3);
         }
-        .clinometers-container {
+        .clinometers-container-big {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            flex-direction: row;
+            justify-content: space-around;
             align-items: center;
-            gap: 10px;
             width: 100%;
+            flex: 1;
+            padding: 0 10px;
         }
-        .gauge-box {
-            width: 115px;
-            height: 115px;
+        .gauge-box-big {
+            width: 155px;
+            height: 155px;
             background-color: #0d0d0d;
             border: 3px solid #333333;
             border-radius: 50%;
@@ -154,40 +157,36 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
         }
-        .horizon-line {
+        .horizon-line-big {
             position: absolute;
-            width: 65px;
-            height: 2px;
+            width: 90px;
+            height: 3px;
             background-color: #cccccc;
             transition: transform 0.1s linear;
         }
-        .gauge-center-icon {
+        .gauge-center-icon-big {
             position: absolute;
             z-index: 2;
-            width: 30px;
-            height: 30px;
+            width: 42px;
+            height: 42px;
             fill: #cccccc;
         }
-        .gauge-label {
+        .gauge-label-big {
             position: absolute;
-            bottom: 10px;
-            font-size: 0.55rem;
+            bottom: 15px;
+            font-size: 0.65rem;
             color: #888888;
             letter-spacing: 1px;
         }
-
-        .bottom-section-clinometer {
-            flex: 1;
-            background-color: #181818;
-            border-top: 2px solid #2a2a2a;
-            position: relative;
-        }
-        #nav-panel-2 iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        .gauge-value-degrees {
+            position: absolute;
+            top: 15px;
+            font-size: 0.8rem;
+            color: #ff9500;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
 
         /* Pulsante Freccia Arancione Universale */
@@ -243,35 +242,33 @@
             </div>
         </div>
 
-        <!-- SCHERMATA 3: Inclinometri del Carrello (Sopra) + Mini Mappa (Sotto) -->
+        <!-- SCHERMATA 3: Inclinometri Grandi con Carrello e Gradi -->
         <div id="screen-clinometer" class="main-panel">
             <div class="top-section-clinometer">
                 <div class="speed-bar">
                     VELOCITÀ: <span id="speed-clinometer">0</span> KM/H
                 </div>
 
-                <div class="clinometers-container">
-                    <div class="gauge-box">
-                        <div id="roll-horizon" class="horizon-line"></div>
-                        <svg class="gauge-center-icon" viewBox="0 0 24 24">
+                <div class="clinometers-container-big">
+                    <!-- Quadrante Rollio Grande -->
+                    <div class="gauge-box-big">
+                        <div id="roll-value" class="gauge-value-degrees">0°</div>
+                        <div id="roll-horizon" class="horizon-line-big"></div>
+                        <svg class="gauge-center-icon-big" viewBox="0 0 24 24">
                             <path d="M4 4h16l-2 9H6L4 4zm2 11h12v2H6v-2zm3 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
                         </svg>
-                        <span class="gauge-label">ROLLIO</span>
+                        <span class="gauge-label-big">ROLLIO</span>
                     </div>
 
-                    <div class="gauge-box">
-                        <div id="pitch-horizon" class="horizon-line"></div>
-                        <svg class="gauge-center-icon" viewBox="0 0 24 24">
+                    <!-- Quadrante Beccheggio Grande -->
+                    <div class="gauge-box-big">
+                        <div id="pitch-value" class="gauge-value-degrees">0°</div>
+                        <div id="pitch-horizon" class="horizon-line-big"></div>
+                        <svg class="gauge-center-icon-big" viewBox="0 0 24 24">
                             <path d="M2 5h3l2 9h10l2-6H8M7 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
                         </svg>
-                        <span class="gauge-label">BECCHEGGIO</span>
+                        <span class="gauge-label-big">BECCHEGGIO</span>
                     </div>
-                </div>
-            </div>
-
-            <div class="bottom-section-clinometer">
-                <div id="nav-panel-2" class="view-panel">
-                    <iframe id="map-frame-2" src="https://www.openstreetmap.org/export/embed.html"></iframe>
                 </div>
             </div>
         </div>
@@ -322,13 +319,25 @@
             }
         });
 
-        // Inclinometro Sensori Telefono
+        // Inclinometro Sensori Telefono con Aggiornamento Gradi Numerici
         if (window.DeviceOrientationEvent) {
             window.addEventListener('deviceorientation', (event) => {
-                let roll = Math.max(-45, Math.min(45, event.gamma || 0));
-                let pitch = Math.max(-45, Math.min(45, event.beta || 0));
-                document.getElementById('roll-horizon').style.transform = `rotate(${roll}deg)`;
-                document.getElementById('pitch-horizon').style.transform = `rotate(${pitch}deg)`;
+                let roll = event.gamma || 0;
+                let pitch = event.beta || 0;
+
+                // Arrotondiamo i gradi per mostrarli chiaramente
+                let rollRounded = Math.round(roll);
+                let pitchRounded = Math.round(pitch);
+
+                document.getElementById('roll-value').textContent = rollRounded + '°';
+                document.getElementById('pitch-value').textContent = pitchRounded + '°';
+
+                // Limitiamo i valori visivi della linea per estetica
+                let visualRoll = Math.max(-45, Math.min(45, roll));
+                let visualPitch = Math.max(-45, Math.min(45, pitch));
+
+                document.getElementById('roll-horizon').style.transform = `rotate(${visualRoll}deg)`;
+                document.getElementById('pitch-horizon').style.transform = `rotate(${visualPitch}deg)`;
             }, true);
         }
 
@@ -360,17 +369,13 @@
                     
                     const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.005}%2C${lat-0.005}%2C${lon+0.005}%2C${lat+0.005}&layer=mapnik&marker=${lat}%2C${lon}`;
                     document.getElementById('map-frame').src = mapUrl;
-                    document.getElementById('map-frame-2').src = mapUrl;
                 },
                 (error) => console.log(error),
                 { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
             );
         }
 
-        // Gestione Sequenziale a 3 Passaggi tramite il Pulsante Arancione:
-        // 0 -> Tachimetro + Grafico
-        // 1 -> Tachimetro + Mappa
-        // 2 -> Inclinometri Carrello + Mappa secondaria
+        // Gestione Ciclica a 3 Passaggi
         let viewMode = 0; 
         const toggleBtn = document.getElementById('toggleViewBtn');
         const screenTelemetry = document.getElementById('screen-telemetry');
@@ -382,21 +387,21 @@
             viewMode = (viewMode + 1) % 3;
 
             if (viewMode === 0) {
-                // 1º Click di ritorno: Tachimetro + Grafico
+                // 1º Click: Tachimetro + Grafico
                 screenClinometer.classList.remove('active-screen');
                 screenTelemetry.classList.remove('hidden-screen');
                 chartPanel.classList.remove('hidden');
                 navPanel.classList.add('hidden');
             } 
             else if (viewMode === 1) {
-                // 2º Click: Tachimetro + Mappa (come l'app originale)
+                // 2º Click: Tachimetro + Mappa
                 screenClinometer.classList.remove('active-screen');
                 screenTelemetry.classList.remove('hidden-screen');
                 chartPanel.classList.add('hidden');
                 navPanel.classList.remove('hidden');
             } 
             else if (viewMode === 2) {
-                // 3º Click: Schermata Inclinometri con il carrello
+                // 3º Click: Inclinometri Grandi a Schermo Intero con Gradi
                 screenTelemetry.classList.add('hidden-screen');
                 screenClinometer.classList.add('active-screen');
             }
