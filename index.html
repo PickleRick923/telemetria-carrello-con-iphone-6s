@@ -29,30 +29,79 @@
             width: 100vw;
             position: relative;
         }
-        /* Metà Superiore: Tachimetro */
-        .speed-section {
+
+        /* Metà Superiore: Velocità + Inclinometri in verticale */
+        .top-section {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            background: radial-gradient(circle at center, #1e1e1e 0%, #121212 100%);
+            border-bottom: 2px solid #2a2a2a;
+            padding: 8px 0;
+        }
+
+        /* Riga velocità compatta in alto */
+        .speed-bar {
+            font-size: 0.9rem;
+            color: #ff9500;
+            font-weight: 600;
+            letter-spacing: 1px;
+            background: rgba(255, 149, 0, 0.1);
+            padding: 3px 12px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 149, 0, 0.3);
+        }
+
+        /* Container dei quadranti in colonna (uno sopra l'altro) */
+        .clinometers-container {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border-bottom: 2px solid #2a2a2a;
-            background: radial-gradient(circle at center, #1e1e1e 0%, #121212 100%);
+            gap: 10px;
+            width: 100%;
         }
-        .speed-display {
-            font-size: 5.5rem;
-            font-weight: 800;
-            color: #ffffff;
-            line-height: 1;
+
+        .gauge-box {
+            width: 115px;
+            height: 115px;
+            background-color: #0d0d0d;
+            border: 3px solid #333333;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
         }
-        .speed-unit {
-            font-size: 1.2rem;
-            color: #ff9500;
-            font-weight: 600;
-            margin-top: 5px;
-            letter-spacing: 2px;
+
+        /* Lancetta / Linea orizzontale inclinabile */
+        .horizon-line {
+            position: absolute;
+            width: 65px;
+            height: 2px;
+            background-color: #cccccc;
+            transition: transform 0.1s linear;
         }
-       
+
+        .gauge-center-icon {
+            position: absolute;
+            z-index: 2;
+            width: 30px;
+            height: 30px;
+            fill: #cccccc;
+        }
+
+        .gauge-label {
+            position: absolute;
+            bottom: 10px;
+            font-size: 0.55rem;
+            color: #888888;
+            letter-spacing: 1px;
+        }
+
         /* Metà Inferiore: Grafico o Navigatore */
         .bottom-section {
             flex: 1;
@@ -72,14 +121,12 @@
             pointer-events: none;
             transform: translateX(20px);
         }
-       
-        /* Stile Navigatore */
+        
         #nav-panel iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
-
 
         /* Pulsante Freccia Arancione */
         .toggle-btn {
@@ -118,33 +165,44 @@
 </head>
 <body>
 
-
     <div class="container">
-        <!-- Metà Superiore: Velocità -->
-        <div class="speed-section">
-          <div id="avg-speed-container" style="color: #ff9500; font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; letter-spacing: 1px;">
-        MEDIA: <span id="avg-speed">0</span> KM/H
-    </div>
-    <div id="speed" class="speed-display">0</div>
-    <div class="speed-unit">KM/H</div>  
+        <!-- Metà Superiore: Velocità compatta + Inclinometri in verticale -->
+        <div class="top-section">
+            <div class="speed-bar">
+                VELOCITÀ: <span id="speed">0</span> KM/H
+            </div>
+
+            <div class="clinometers-container">
+                <!-- Quadrante Sopra: Rollio (Fronte carrello) -->
+                <div class="gauge-box">
+                    <div id="roll-horizon" class="horizon-line"></div>
+                    <svg class="gauge-center-icon" viewBox="0 0 24 24">
+                        <path d="M4 4h16l-2 9H6L4 4zm2 11h12v2H6v-2zm3 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+                    </svg>
+                    <span class="gauge-label">ROLLIO</span>
+                </div>
+
+                <!-- Quadrante Sotto: Beccheggio (Profilo carrello) -->
+                <div class="gauge-box">
+                    <div id="pitch-horizon" class="horizon-line"></div>
+                    <svg class="gauge-center-icon" viewBox="0 0 24 24">
+                        <path d="M2 5h3l2 9h10l2-6H8M7 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                    </svg>
+                    <span class="gauge-label">BECCHEGGIO</span>
+                </div>
+            </div>
         </div>
 
-
-        <!-- Metà Inferiore: Contenitore Alternato -->
+        <!-- Metà Inferiore: Grafico o Navigatore -->
         <div class="bottom-section">
-            <!-- Pannello Grafico -->
             <div id="chart-panel" class="view-panel">
                 <canvas id="speedChart"></canvas>
             </div>
 
-
-            <!-- Pannello Navigatore -->
             <div id="nav-panel" class="view-panel hidden">
                 <iframe id="map-frame" src="https://www.openstreetmap.org/export/embed.html"></iframe>
             </div>
 
-
-            <!-- Pulsante Freccia Arancione -->
             <button id="toggleViewBtn" class="toggle-btn" aria-label="Cambia Vista">
                 <svg viewBox="0 0 24 24">
                     <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
@@ -153,14 +211,12 @@
         </div>
     </div>
 
-
     <script>
         // Configurazione Grafico Chart.js
         const ctx = document.getElementById('speedChart').getContext('2d');
         const maxDataPoints = 30;
         const speedData = Array(maxDataPoints).fill(0);
         const labels = Array(maxDataPoints).fill('');
-
 
         const chart = new Chart(ctx, {
             type: 'line',
@@ -192,15 +248,24 @@
             }
         });
 
+        // Gestione Inclinometro tramite Sensori Telefono (DeviceOrientation)
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener('deviceorientation', (event) => {
+                let roll = event.gamma || 0;
+                let pitch = event.beta || 0;
 
-        // Variabili Telemetria e GPS
+                roll = Math.max(-45, Math.min(45, roll));
+                pitch = Math.max(-45, Math.min(45, pitch));
+
+                document.getElementById('roll-horizon').style.transform = `rotate(${roll}deg)`;
+                document.getElementById('pitch-horizon').style.transform = `rotate(${pitch}deg)`;
+            }, true);
+        }
+
+        // Tracciamento GPS e Velocità
         let currentSpeed = 0;
         let displayedSpeed = 0;
 
-        let speedSum = 0;
-        let speedCount = 0;
-
-        // Animazione fluida tachimetro
         function animateSpeed() {
             displayedSpeed += (currentSpeed - displayedSpeed) * 0.1;
             document.getElementById('speed').textContent = Math.round(displayedSpeed);
@@ -208,28 +273,16 @@
         }
         animateSpeed();
 
-
-        // Tracciamento GPS
         if ("geolocation" in navigator) {
             navigator.geolocation.watchPosition(
                 (position) => {
                     const speedMs = position.coords.speed || 0;
-                    currentSpeed = Math.max(0, speedMs * 3.6); // Converte in km/h
-                    
-if (currentSpeed > 0) { // Registra il dato se il carrello è in movimento
-                speedSum += currentSpeed;
-                speedCount++;
-                const avgSpeed = (speedSum / speedCount).toFixed(1);
-                document.getElementById('avg-speed').textContent = avgSpeed;
-            }
+                    currentSpeed = Math.max(0, speedMs * 3.6);
 
-                    // Aggiorna Grafico
                     speedData.push(currentSpeed);
                     speedData.shift();
                     chart.update();
 
-
-                    // Aggiorna Mappa Navigatore se disponibile
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     const mapFrame = document.getElementById('map-frame');
@@ -242,12 +295,10 @@ if (currentSpeed > 0) { // Registra il dato se il carrello è in movimento
             );
         }
 
-
         // Gestione Cambio Vista (Grafico / Navigatore)
         const toggleBtn = document.getElementById('toggleViewBtn');
         const chartPanel = document.getElementById('chart-panel');
         const navPanel = document.getElementById('nav-panel');
-
 
         toggleBtn.addEventListener('click', () => {
             const isChartVisible = !chartPanel.classList.contains('hidden');
@@ -261,31 +312,24 @@ if (currentSpeed > 0) { // Registra il dato se il carrello è in movimento
                 toggleBtn.classList.remove('active');
             }
         });
-        // Mantiene lo schermo attivo (impedisce lo standby)
-let wakeLock = null;
 
-
-async function requestWakeLock() {
-    try {
-        if ('wakeLock' in navigator) {
-            wakeLock = await navigator.wakeLock.request('screen');
+        // Mantiene lo schermo attivo (Wake Lock)
+        let wakeLock = null;
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log(`Errore Wake Lock: ${err.name}, ${err.message}`);
+            }
         }
-    } catch (err) {
-        console.log(`Errore Wake Lock: ${err.name}, ${err.message}`);
-    }
-}
-
-
-// Attiva il blocco dello standby all'avvio
-requestWakeLock();
-
-
-// Riattiva il blocco se l'utente cambia scheda e poi torna sull'app
-document.addEventListener('visibilitychange', async () => {
-    if (wakeLock !== null && document.visibilityState === 'visible') {
-        await requestWakeLock();
-    }
-});
+        requestWakeLock();
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        });
     </script>
 </body>
 </html>
