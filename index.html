@@ -197,6 +197,8 @@
         let currentSpeed = 0;
         let displayedSpeed = 0;
 
+        let speedSum = 0;
+        let speedCount = 0;
 
         // Animazione fluida tachimetro
         function animateSpeed() {
@@ -213,7 +215,13 @@
                 (position) => {
                     const speedMs = position.coords.speed || 0;
                     currentSpeed = Math.max(0, speedMs * 3.6); // Converte in km/h
-
+                    
+if (currentSpeed > 0) { // Registra il dato se il carrello è in movimento
+                speedSum += currentSpeed;
+                speedCount++;
+                const avgSpeed = (speedSum / speedCount).toFixed(1);
+                document.getElementById('avg-speed').textContent = avgSpeed;
+            }
 
                     // Aggiorna Grafico
                     speedData.push(currentSpeed);
